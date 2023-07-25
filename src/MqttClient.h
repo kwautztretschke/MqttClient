@@ -1,19 +1,11 @@
 #ifndef __MQTTCLIENT_H__
 #define __MQTTCLIENT_H__
-#include <ESP8266WiFi.h>
-#include <PubSubClient.h>
 
 #include "wificredentials.h"
 
-#ifndef __WIFICREDENTIALS_H__
-	namespace wificredentials{
-		const String 	ssid = 			"dummerhotspot";
-		const String	password = 		"Amogus187";
-		const IPAddress mqttServerIp = 	IPAddress(10,42,0,141);
-		const String	deviceName = 	"tollerESP";
-	}
-#endif
-
+class WiFiClient;
+class PubSubClient;
+class String;
 
 class MqttClientClass{
 private:

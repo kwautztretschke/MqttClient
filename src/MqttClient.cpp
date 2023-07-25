@@ -1,6 +1,8 @@
 #include "MqttClient.h"
 #include <cstring>
 
+#include <ESP8266WiFi.h>
+#include <PubSubClient.h>
 
 void MqttClientClass::handleMessage(char* topic, uint8_t* payload, unsigned int plen){
 	//************************* Receiving Package ***********************************

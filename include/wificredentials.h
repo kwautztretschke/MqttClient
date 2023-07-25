@@ -1,7 +1,8 @@
 #ifndef __WIFICREDENTIALS_H__
 #define __WIFICREDENTIALS_H__
 
-#include <ESP8266WiFi.h>
+class String;
+class IPAddress;
 
 namespace wificredentials{
 	const String 	ssid = 			"dummerhotspot";
