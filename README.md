@@ -13,3 +13,6 @@ MqttClient.setRebootCallback(0);
 MqttClient.init();
 ```
 if you are using my program manager, which this thing is kind of designed to work with
+
+# Dependencies
+This library was built using platform.io and the libraries ESP8266WiFi and PubSubClient
