@@ -1,12 +1,9 @@
 #include "MqttClient.h"
-#include <cstring>
 
-#include <ESP8266WiFi.h>
-#include <PubSubClient.h>
 
 void MqttClientClass::handleMessage(char* topic, uint8_t* payload, unsigned int plen){
 	//************************* Receiving Package ***********************************
-	// copy payload into buffer
+	// copy payload into empty buffer
 	if(plen>=127){
 		Serial.println("Error, payload too large");
 		return;
@@ -22,8 +19,8 @@ void MqttClientClass::handleMessage(char* topic, uint8_t* payload, unsigned int 
 		Serial.printf("Error, topic too short, i=%d, tlen=%d\n", i, tlen);
 		return;
 	}
-	topic 	+= i;		// topic pointer now points to correct beginning
-	tlen 	-= i;		// tlen is the length of the topic string
+	topic 	+= i;		// topic pointer now points to first character
+	tlen 	-= i;		// topic length is now accurate
 
 	Serial.printf("Decoded topic: %s\n", topic);
 
@@ -51,11 +48,8 @@ void MqttClientClass::handleMessage(char* topic, uint8_t* payload, unsigned int 
 
 void MqttClientClass::connectMqtt(){
 	// Loop until we're reconnected
-	while (!m_client.connected()) {
+	while (!m_Client.connected()) {
 		Serial.print("Attempting MQTT connection...");
-		// Create a random client ID
-		String clientId = "ESP8266Client-";
-		clientId += mac_address;
 		// Attempt to connect
 		if (m_Client.connect(m_DeviceName.c_str())) {
 			Serial.println("connected");
@@ -63,67 +57,31 @@ void MqttClientClass::connectMqtt(){
 			String status_topic = "reactor/" + m_DeviceName + "/status";
 			m_Client.publish((const char*)status_topic.c_str(), "connected");
 		} else {
-		Serial.print("failed, rc=");
-		Serial.print(m_client.state());
-		Serial.println(" try again in 5 seconds");
-		// Wait 5 seconds before retrying
-		delay(5000);
+			Serial.print("failed, rc=");
+			Serial.print(m_Client.state());
+			Serial.println(" try again in 5 seconds");
+			// Wait 5 seconds before retrying
+			delay(5000);
 		}
 	}
 }
 
 
 void MqttClientClass::startWiFi(){
-	m_mac_address = WiFi.macAddress();
+	String mac_address = WiFi.macAddress();
 	Serial.println();
-	Serial.print("MAC-Address: ");
-	Serial.println(m_mac_address);
-	Serial.print("Connecting to ");
-	Serial.println(wificredentials::ssid);
+	Serial.println(	"MAC-Address: " + mac_address + 
+					", device name" + m_DeviceName);
+	Serial.println("Connecting to " + wificredentials::ssid);
 	WiFi.mode(WIFI_STA);
 	WiFi.begin(wificredentials::ssid, wificredentials::password);
 	while (WiFi.status() != WL_CONNECTED) {
 		Serial.print('.');
 		delay(500);
 	}
-	Serial.print("Connected! IP address: ");
-	Serial.println(WiFi.localIP());
-	m_client.setClient(m_wifi);
-	m_client.setServer(wificredentials::mqttServerIp, 1883);
-	reconnect(m_mac_address);
+	Serial.println("WiFi connected! IP address: " + WiFi.localIP().toString());
 }
 
-String MqttClientClass::receiveNameFromMacAddress(){
-	char name[32] = {0};
-	bool name_received = false;
-	// set a temporary callback
-	m_client.setCallback(
-		[&name, &name_received](char* topic, uint8_t* payload, unsigned int length){
-			strncpy(name, (char*)payload, length);
-			name_received = true;
-		}
-	);
-	// declare our status as searching
-	String mac_status_topic = "mac/" + m_mac_address + "/status";
-	m_client.publish((const char*)mac_status_topic.c_str(), "searching_name");
-	// subscribe to the appropriate topic
-	String mac_name_topic = "mac/" + m_mac_address + "/name";
-	m_client.subscribe((const char*)mac_name_topic.c_str());
-	Serial.print("Waiting to receive device name via ");
-	Serial.print(mac_name_topic);
-	// wait until a name is received
-	while(!name_received){
-		m_client.loop();
-		Serial.print(".");
-		delay(10);
-	}
-	// name received!
-	m_client.publish((const char*)mac_status_topic.c_str(), "ready");
-	Serial.println();
-	Serial.print("My name is ");
-	Serial.println(name);
-	return String(name);
-}
 
 void MqttClientClass::init(){
 	// connect to mqtt broker

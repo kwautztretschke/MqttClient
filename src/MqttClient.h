@@ -3,9 +3,9 @@
 
 #include "wificredentials.h"
 
-class WiFiClient;
-class PubSubClient;
-class String;
+#include <ESP8266WiFi.h>
+#include <PubSubClient.h>
+
 
 class MqttClientClass{
 private:
@@ -13,7 +13,7 @@ private:
 	PubSubClient 	m_Client;
 	const String	m_DeviceName = wificredentials::deviceName;
 	char			m_plBuffer[128] = {0};
-	void		 	handleMessage(char* topic, uint8_t* payload, unsigned int length);
+	void		 	handleMessage(char* topic, uint8_t* payload, unsigned int plen);
 	void 			connectMqtt(); 
 	// callbacks
 	int				(*p_input)(char* key, char* value);
