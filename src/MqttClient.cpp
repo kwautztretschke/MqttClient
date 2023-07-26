@@ -28,6 +28,28 @@ void MqttClientClass::handleMessage(char* topic, uint8_t* payload, unsigned int 
 	// depending on which topic was received, do things like invoke callbacks
 	if (strncmp(topic, "reboot", tlen) == 0) {
 		p_reboot();
+	} else if (strncmp(topic, "power", tlen) == 0) {
+		if (strncmp(m_plBuffer, "on", plen) == 0)
+			p_power(true);
+		else
+			p_power(false);
+	} else if (strncmp(topic, "brightness", tlen) == 0) {
+		int brightness = strtol(m_plBuffer, NULL, 10);
+		if (brightness > 255)
+			brightness = 255;
+		else if (brightness < 0)
+			brightness = 0;
+		p_brightness((uint8_t) brightness);
+	// zylProgManager related stuff
+	} else if (strncmp(topic, "color", tlen) == 0) {
+		uint8_t c[3] = {0};
+		char buf[3] = {0};
+		for (int i=0; i<3; i++){
+			buf[0] = m_plBuffer[2*i];
+			buf[1] = m_plBuffer[2*i+1];
+			c[i] = strtol(buf, NULL, 16);
+		}
+		p_color(c);
 	} else if (strncmp(topic, "focus", tlen) == 0) {
 		if(!plen) {
 			Serial.println("Error, no payload");

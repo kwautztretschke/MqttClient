@@ -12,10 +12,13 @@ private:
 	WiFiClient		m_WifiClient;
 	PubSubClient 	m_Client;
 	const String	m_DeviceName = wificredentials::deviceName;
-	char			m_plBuffer[128] = {0};
+	char			m_plBuffer[128] = {0}; 
 	void		 	handleMessage(char* topic, uint8_t* payload, unsigned int plen);
 	void 			connectMqtt(); 
 	// callbacks
+	void			(*p_power)(bool power);
+	void 			(*p_brightness)(uint8_t brightness);
+	void 			(*p_color)(uint8_t* c);
 	int				(*p_input)(char* key, char* value);
 	int				(*p_focus)(char* program);
 	void			(*p_reboot)();
@@ -25,6 +28,9 @@ public:
 	void 			init();
 	void 			loop(); 
 	// callbacks
+	void			setPowerCallback(void (*power)(bool power)) {p_power = power;}
+	void			setBrightnessCallback(void (*brightness)(uint8_t c)) {p_brightness = brightness;}
+	void			setColorCallback(void (*color)(uint8_t* c)) {p_color = color;}
 	void			setInputCallback(int (*input)(char* key, char* value)) {p_input = input;}
 	void			setFocusCallback(int (*focus)(char* program)) {p_focus = focus;}
 	void			setRebootCallback(void (*reboot)()) {p_reboot = reboot;}
