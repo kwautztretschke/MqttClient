@@ -124,8 +124,10 @@ void MqttClientClass::init(){
 
 void MqttClientClass::loop(){
 	m_Client.loop();
-	if(!m_Client.connected())
+	if(!m_Client.connected()){
+		Serial.println("Lost Connection to MQTT Broker!");
 		connectMqtt();
+	}
 }
 
 MqttClientClass MqttClient;
