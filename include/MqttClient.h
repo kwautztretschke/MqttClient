@@ -13,7 +13,10 @@ private:
 	PubSubClient 	m_Client;
 	const String	m_DeviceName = wificredentials::deviceName;
 	char			m_plBuffer[128] = {0}; 
+	uint8_t			m_Hour = 0;
+	uint8_t			m_Minute = 0;
 	void		 	handleMessage(char* topic, uint8_t* payload, unsigned int plen);
+	void 			keepAlive(char* topic, uint8_t* payload, unsigned int plen);
 	void 			connectMqtt(); 
 	// callbacks
 	void			(*p_power)(bool power);

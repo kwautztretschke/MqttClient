@@ -12,6 +12,12 @@ void MqttClientClass::handleMessage(char* topic, uint8_t* payload, unsigned int 
 	strncpy(m_plBuffer, (char*)payload, plen);
 	Serial.printf("Message l=%d arrived [%s]: \"%s\"\n", plen, topic, m_plBuffer);
 
+	// if the topic is state/time, call the keepalive function and end early
+	if(strncmp(topic, "state/time", 10) == 0){
+		keepAlive(topic, payload, plen);
+		return;
+	}
+
 	// decode topic and strip "reactor/devicename/" part
 	unsigned int i = String("reactor/" + m_DeviceName + "/").length();
 	unsigned int tlen = strlen(topic);
@@ -33,6 +39,8 @@ void MqttClientClass::handleMessage(char* topic, uint8_t* payload, unsigned int 
 			p_power(true);
 		else
 			p_power(false);
+	} else if (strncmp(topic, "info", 4) == 0) {
+		return; // ignore info messages, we sent those ourselves
 	} else if (strncmp(topic, "brightness", tlen) == 0) {
 		int brightness = strtol(m_plBuffer, NULL, 10);
 		if (brightness > 255)
@@ -119,6 +127,25 @@ void MqttClientClass::init(){
 	String reactor_topic = "reactor/" + m_DeviceName + "/#";
 	m_Client.subscribe((const char*)reactor_topic.c_str());
 	Serial.println("Subscribed to " + reactor_topic);
+	// also subscribe to state/time/# for the keepalive message
+	m_Client.subscribe("state/time/#");
+}
+
+void MqttClientClass::keepAlive(char* topic, uint8_t* payload, unsigned int plen){
+	// update our member variables depending on the received state/time message
+	if (strncmp(topic, "state/time/hour", 16) == 0) {
+		m_Hour = strtol((char*)payload, NULL, 10);
+	} else if (strncmp(topic, "state/time/minute", 18) == 0) {
+		m_Minute = strtol((char*)payload, NULL, 10);
+	} else {
+		Serial.printf("Error: command \"%s\" not recognized\n", topic);
+		return;
+	}
+	// publish current time to reactor/<name>/time as retained message
+	String time_topic = "reactor/" + m_DeviceName + "/info/last_known_time";
+	char time_payload[6] = {0};
+	snprintf(time_payload, 6, "%02d:%02d", m_Hour, m_Minute);
+	m_Client.publish((const char*)time_topic.c_str(), (const char*)time_payload, true);
 }
 
 
