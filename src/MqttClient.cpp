@@ -49,15 +49,18 @@ void MqttClientClass::handleMessage(char* topic, uint8_t* payload, unsigned int 
 			brightness = 0;
 		p_brightness((uint8_t) brightness);
 	// zylProgManager related stuff
-	} else if (strncmp(topic, "color", tlen) == 0) {
-		uint8_t c[3] = {0};
+	} else if (strncmp(topic, "color/", 6) == 0) {
+		// parse the number after color/ as int
+		uint8_t index = strtol(topic + 6, NULL, 10);
+		// parse the payload as hex color
+		uint8_t color[3] = {0};
 		char buf[3] = {0};
 		for (int i=0; i<3; i++){
 			buf[0] = m_plBuffer[2*i];
 			buf[1] = m_plBuffer[2*i+1];
-			c[i] = strtol(buf, NULL, 16);
+			color[i] = strtol(buf, NULL, 16);
 		}
-		p_color(c);
+		p_color(index, color);
 	} else if (strncmp(topic, "focus", tlen) == 0) {
 		if(!plen) {
 			Serial.println("Error, no payload");

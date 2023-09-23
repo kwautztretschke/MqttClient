@@ -21,7 +21,7 @@ private:
 	// callbacks
 	void			(*p_power)(bool power);
 	void 			(*p_brightness)(uint8_t brightness);
-	void 			(*p_color)(uint8_t* c);
+	void 			(*p_color)(uint8_t i, uint8_t* c);
 	int				(*p_input)(char* key, char* value);
 	int				(*p_focus)(char* program);
 	void			(*p_reboot)();
@@ -33,7 +33,7 @@ public:
 	// callbacks
 	void			setPowerCallback(void (*power)(bool power)) {p_power = power;}
 	void			setBrightnessCallback(void (*brightness)(uint8_t c)) {p_brightness = brightness;}
-	void			setColorCallback(void (*color)(uint8_t* c)) {p_color = color;}
+	void			setColorCallback(void (*color)(uint8_t i, uint8_t* c)) {p_color = color;}
 	void			setInputCallback(int (*input)(char* key, char* value)) {p_input = input;}
 	void			setFocusCallback(int (*focus)(char* program)) {p_focus = focus;}
 	void			setRebootCallback(void (*reboot)()) {p_reboot = reboot;}
