@@ -86,6 +86,13 @@ void MqttClientClass::connectMqtt(){
 			// Once connected, publish an announcement...
 			String status_topic = "reactor/" + m_DeviceName + "/status";
 			m_Client.publish((const char*)status_topic.c_str(), "connected");
+			// Subscribe to all topics belonging to this reactor via
+			// reactor/<name>/#
+			String reactor_topic = "reactor/" + m_DeviceName + "/#";
+			m_Client.subscribe((const char*)reactor_topic.c_str());
+			Serial.println("Subscribed to " + reactor_topic);
+			// also subscribe to state/time/# for the keepalive message
+			m_Client.subscribe("state/time/#");
 		} else {
 			Serial.print("failed, rc=");
 			Serial.print(m_Client.state());
@@ -122,13 +129,6 @@ void MqttClientClass::init(){
 		{handleMessage(topic, payload, length);}
 	);
 	connectMqtt();
-	// Subscribe to all topics belonging to this reactor via
-	// reactor/<name>/#
-	String reactor_topic = "reactor/" + m_DeviceName + "/#";
-	m_Client.subscribe((const char*)reactor_topic.c_str());
-	Serial.println("Subscribed to " + reactor_topic);
-	// also subscribe to state/time/# for the keepalive message
-	m_Client.subscribe("state/time/#");
 }
 
 void MqttClientClass::keepAlive(char* topic, uint8_t* payload, unsigned int plen){
