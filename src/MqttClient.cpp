@@ -114,7 +114,11 @@ void MqttClientClass::startWiFi(){
 					", device name" + m_DeviceName);
 	Serial.println("Connecting to " + wificredentials::ssid);
 	WiFi.mode(WIFI_STA);
-	WiFi.begin(wificredentials::ssid, wificredentials::password);
+	#ifdef Z_ZYLINDER
+		WiFi.begin(wificredentials::ssid.c_str(), wificredentials::password.c_str());
+	#else
+		WiFi.begin(wificredentials::ssid, wificredentials::password);
+	#endif
 	while (WiFi.status() != WL_CONNECTED) {
 		Serial.print('.');
 		delay(500);

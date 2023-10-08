@@ -3,7 +3,11 @@
 
 #include "wificredentials.h"
 
-#include <ESP8266WiFi.h>
+#ifdef Z_ZYLINDER
+	#include <WiFi.h>
+#else
+	#include <ESP8266WiFi.h>
+#endif
 #include <PubSubClient.h>
 
 
